@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LinguaPlan – Planner de Idiomas</title>
+<style>
+:root{--bg:#f5f6fb;--card:#fff;--tx:#1b1f2a;--mu:#667085;--ac:#4f46e5;--ac2:#e5e7ff;--ok:#16a34a;--bad:#dc2626;--bd:#e3e6ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1120;--card:#171b2e;--tx:#e8eaf3;--mu:#98a0b8;--ac:#8b85ff;--ac2:#262b4d;--ok:#4ade80;--bad:#f87171;--bd:#2a3050}}
+:root[data-theme="dark"]{--bg:#0e1120;--card:#171b2e;--tx:#e8eaf3;--mu:#98a0b8;--ac:#8b85ff;--ac2:#262b4d;--ok:#4ade80;--bad:#f87171;--bd:#2a3050}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.w{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.3rem;margin:0}h2{font-size:1.05rem;margin:0 0 8px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+button,select,textarea{font:inherit;color:var(--tx)}
+button{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 14px;cursor:pointer}
+button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+button:disabled{opacity:.5}
+.chip{border-radius:20px;padding:5px 12px;font-size:.9rem}
+.tabs button{flex:1;min-width:80px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:10px 0}
+.mu{color:var(--mu);font-size:.9rem}
+.tag{display:inline-block;background:var(--ac2);border-radius:8px;padding:2px 9px;margin:2px;font-size:.85rem}
+.bar{height:10px;background:var(--ac2);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+label.t{display:flex;gap:8px;align-items:flex-start;padding:4px 0}
+a{color:var(--ac)}
+.o{display:block;width:100%;text-align:left;margin:6px 0}
+.o.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--card))}
+.o.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--card))}
+.msg{padding:8px 12px;border-radius:12px;margin:6px 0;white-space:pre-wrap;max-width:90%}
+.msg.u{background:var(--ac);color:#fff;margin-left:auto}.msg.a{background:var(--ac2)}
+textarea{width:100%;box-sizing:border-box;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px;min-height:60px}
+input[type=checkbox]{flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:var(--ac);cursor:pointer}
+input:not([type=checkbox]){flex:1;min-width:0;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px;font:inherit;color:var(--tx)}
+.tk{margin-bottom:6px}.tk details{margin:2px 0 6px 28px;font-size:.92rem}.tk summary{cursor:pointer;color:var(--ac)}.tk p{margin:6px 0}.tk ol{margin:4px 0;padding-left:20px}
+select{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:4px 8px}
+</style></head><body><div class="w">
+<div class="top"><h1>🌍 LinguaPlan</h1><div class="row" style="margin:0"><button id="ky">🔑 IA</button><button id="th"></button></div></div>
+<div class="row" id="lg"></div>
+<div class="row" id="lv"></div>
+<div class="row tabs" id="tb"></div>
+<div id="main"></div>
+</div>
+<script>
+const LV=['A1','A2','B1','B2','C1','C2'];
+const D={
+en:{n:'Inglês',w:'English',
+m:{A1:['Greetings','Verb to be','Numbers','Family','Daily routine'],A2:['Past simple','Future (will/going to)','Comparatives','Shopping','Travel'],B1:['Present perfect','Conditionals 0/1/2','Modal verbs','Telling stories','Giving opinions'],B2:['Passive voice','Reported speech','3rd conditional','Phrasal verbs','Debates'],C1:['Inversion','Collocations','Nuance & tone','Academic writing','Idioms'],C2:['Register','Subtle meaning','Literature','Native-speed listening','Rhetoric']},
+ch:{A1:['BBC Learning English','English with Lucy','EnglishClass101'],A2:['BBC Learning English','Learn English with TV Series','mmmEnglish'],B1:["Rachel's English",'mmmEnglish','English with Lucy'],B2:['Speak English With Vanessa','Learn English with TV Series','TED-Ed'],C1:['TED-Ed','BBC Learning English',"Rachel's English"],C2:['TED','BBC Learning English','Speak English With Vanessa']},
+q:{A1:[['She ___ a student.',['am','is','are'],1],['Como se diz "Obrigado" em inglês?',['Please','Sorry','Thank you'],2]],
+A2:[['Yesterday I ___ to the market.',['go','went','gone'],1],['My house is ___ than yours.',['big','bigger','biggest'],1]],
+B1:[['I ___ here since 2020.',['live','lived','have lived'],2],['If I ___ rich, I would travel the world.',['am','were','will be'],1]],
+B2:[['The report ___ by the team yesterday.',['was finished','finished','has finish'],0],['She said she ___ tired.',['is','was','be'],1]],
+C1:[['Not only ___ late, but he also forgot the documents.',['he was','was he','he is'],1],['"Break the ice" significa...',['iniciar uma conversa','quebrar algo','ficar com raiva'],0]],
+C2:[['Qual é a frase mais formal?',['Can you help me?','Might I request your assistance?','Help me, please.'],1],['"Ubiquitous" significa...',['raro','onipresente','perigoso'],1]]}},
+es:{n:'Espanhol',w:'Spanish',
+m:{A1:['Saludos','Ser y estar','Números','La familia','Rutina diaria'],A2:['Pretérito indefinido','Futuro','Comparativos','De compras','Viajes'],B1:['Perfecto e imperfecto','Condicional','Subjuntivo básico','Contar historias','Dar opiniones'],B2:['Subjuntivo','Estilo indirecto','Voz pasiva','Conectores','Debates'],C1:['Matices','Registros','Escritura académica','Modismos','Subjuntivo avanzado'],C2:['Dominio del registro','Literatura','Ironía y humor','Variedades regionales','Retórica']},
+ch:{A1:['Dreaming Spanish','Easy Spanish','SpanishPod101'],A2:['Dreaming Spanish','Profedeele','Butterfly Spanish'],B1:['Español con Juan','Dreaming Spanish','Easy Spanish'],B2:['Español con Juan','Profedeele','Dreaming Spanish'],C1:['Dreaming Spanish','Español con Juan','TED en Español'],C2:['TED en Español','Dreaming Spanish','Easy Spanish']},
+q:{A1:[['Yo ___ estudiante.',['soy','estoy','es'],0],['Como se diz "Obrigado" em espanhol?',['Gracias','Perdón','Hola'],0]],
+A2:[['Ayer yo ___ al mercado.',['voy','fui','iba'],1],['Mi casa es ___ que la tuya.',['más grande','muy grande','grandísimo'],0]],
+B1:[['Cuando era niño, ___ en el campo.',['viví','vivía','he vivido'],1],['Si tuviera dinero, ___ el mundo.',['viajaré','viajaría','viajo'],1]],
+B2:[['Espero que tú ___ pronto.',['vienes','vengas','vendrás'],1],['Dijo que ___ cansado.',['está','estaba','estará'],1]],
+C1:[['"Estar en las nubes" significa...',['estar distraído','voar','estar triste'],0],['Qual está correta?',['Ojalá que llueva mañana','Ojalá que llueve mañana','Ojalá que lloverá mañana'],0]],
+C2:[['"Efímero" significa...',['que dura pouco','muito grande','antigo'],0],['Qual é o registro mais formal?',['Dame eso','¿Sería tan amable de ayudarme?','Ayúdame ya'],1]]}}};
+const DAYS=[['Segunda',[
+['Vocabulário novo do módulo',40,'Aprender palavras novas ligadas ao tema do módulo.',['Escolha 10 palavras ligadas a: {T}.','Procure cada uma na aba Dicionário e ouça a pronúncia no 🔊.','Escreva uma frase sua com cada palavra.','Guarde as mais difíceis em ⭐ Meu vocabulário.']],
+['Flashcards / revisão',30,'Revisar as palavras para fixar na memória.',['Junte as palavras de hoje e as da semana passada.','Olhe a palavra em {I} e tente lembrar o significado antes de ver a resposta.','Separe as que errou e repita no final.','O objetivo é lembrar sem olhar: vá sem pressa.']],
+['Listening curto',30,'Treinar o ouvido com um áudio curto.',['Abra um vídeo de até 5 minutos na aba Vídeos.','Assista uma vez sem legenda e anote o que entendeu.','Assista de novo com legenda em {I}.','Anote 3 palavras ou expressões novas.']]]],
+['Terça',[
+['Gramática do módulo',50,'Entender a regra gramatical do tema da semana.',['Escolha um tópico do módulo: {T}.','No Tutor IA, peça: "Explique este tópico com exemplos simples".','Escreva a regra com as suas palavras no caderno.','Crie 3 frases de exemplo.']],
+['Exercícios escritos',50,'Praticar a regra de hoje na escrita.',['Faça de 8 a 10 exercícios sobre o tópico de hoje (livro, site ou peça ao Tutor IA).','Responda sem consultar a regra.','Confira e corrija os erros.','Anote cada erro junto com a regra que explica o acerto.']]]],
+['Quarta',[
+['Vídeo de apoio (aba Vídeos)',50,'Aprender com um vídeo de um canal recomendado para o seu nível.',['Abra a aba Vídeos e escolha um vídeo de um tópico do módulo.','Assista com caderno na mão.','Pause nos trechos importantes e anote.','Escreva um resumo de 3 linhas em {I}.']],
+['Shadowing: repetir em voz alta',50,'Imitar a fala de um nativo para melhorar pronúncia e ritmo.',['Escolha um trecho de 30 a 60 segundos de um vídeo ou áudio.','Ouça uma vez só prestando atenção.','Ouça de novo e repita logo depois, imitando ritmo e entonação.','Repita até ficar parecido. Se puder, grave e compare.']]]],
+['Quinta',[
+['Conversar com o Tutor IA',60,'Praticar conversação escrevendo com o Tutor IA.',['Abra a aba Tutor IA.','Peça: "Vamos praticar conversação sobre {T}".','Responda em {I}, mesmo errando.','Peça correções e refaça as frases corrigidas.']],
+['Gravar um áudio de 1 min',40,'Praticar a fala sozinho.',['Escolha um tema do módulo.','Fale por 1 minuto em {I} gravando no celular.','Ouça e anote erros e pausas.','Grave de novo, melhorando os pontos anotados.']]]],
+['Sexta',[
+['Ler um texto curto',50,'Treinar leitura com um texto do seu nível.',['Escolha um texto curto (notícia simples, post ou história).','Leia sem traduzir tudo, buscando a ideia geral.','Sublinhe palavras novas e procure no Dicionário.','Conte em uma frase do que o texto fala.']],
+['Escrever um parágrafo',50,'Treinar escrita com um texto seu.',['Escolha um tema do módulo: {T}.','Escreva de 5 a 8 linhas em {I} usando palavras da semana.','No Tutor IA, envie "Corrija meu texto:" e cole o parágrafo.','Leia as correções e reescreva a versão final.']]]],
+['Sábado',[
+['Revisão geral da semana',50,'Fixar tudo o que foi estudado.',['Releia as anotações da semana.','Refaça os flashcards.','Reveja os erros dos exercícios.','Liste as dúvidas e leve para o Tutor IA.']],
+['Prova do módulo (aba Provas)',50,'Testar o que você aprendeu e liberar o próximo nível.',['Abra a aba Provas e inicie a prova do módulo.','Faça sem consultar anotações.','Leia a explicação de cada resposta, certa ou errada.','Com 80% ou mais, o próximo nível é desbloqueado.']]]],
+['Domingo',[
+['Imersão leve: série, música ou podcast',100,'Ter contato divertido com o idioma, sem pressão.',['Escolha algo de que você gosta: série, música ou podcast em {I}.','Assista ou ouça sem a obrigação de entender tudo.','Se quiser, ative legenda em {I}.','Anote uma expressão de que gostou.']]]]];
+const $=s=>document.querySelector(s),mem={};
+const st={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]??null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const S={lang:st.get('lp:lang')||'en',lv:st.get('lp:lv')||'A1',tab:'plan',min:+(st.get('lp:min')||60)};
+const best=(g,l)=>+(st.get(`lp:b:${g}:${l}`)||0);
+const open=(l,g=S.lang)=>{const i=LV.indexOf(l);return i<1||best(g,LV[i-1])>=80};
+if(!open(S.lv))S.lv='A1';
+let Q=null,H=[],busy=false,sample,DQ='',DR=null;
+const PROXY='';/* opcional: URL do seu proxy (ex.: Cloudflare Worker) que repassa para a API da Anthropic */
+const MODEL='claude-sonnet-5-5';
+const can=()=>!!(sample||PROXY||st.get('lp:key'));
+async function askAI(turns){
+ if(sample)return (await sample(turns,{cache:false})).text;
+ const h={'content-type':'application/json'};
+ if(!PROXY){h['x-api-key']=st.get('lp:key');h['anthropic-version']='2023-06-01';h['anthropic-dangerous-direct-browser-access']='true'}
+ const r=await fetch(PROXY||'https://api.anthropic.com/v1/messages',{method:'POST',headers:h,body:JSON.stringify({model:MODEL,max_tokens:2500,messages:turns})});
+ if(!r.ok)throw new Error('http '+r.status);
+ const j=await r.json();return j.content.filter(c=>c.type=='text').map(c=>c.text).join('')}
+function theme(t){document.documentElement.dataset.theme=t;st.set('lp:theme',t);$('#th').textContent=t==='dark'?'☀️ Modo dia':'🌙 Modo noite'}
+theme(st.get('lp:theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+$('#th').onclick=()=>theme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+function nav(){
+ $('#lg').innerHTML=Object.keys(D).map(k=>`<button class="${S.lang==k?'on':''}" data-l="${k}">${k=='en'?'🇬🇧':'🇪🇸'} ${D[k].n}</button>`).join('');
+ $('#lv').innerHTML=LV.map(l=>{const o=open(l);return `<button class="chip ${S.lv==l?'on':''}" data-v="${l}" ${o?'':'disabled title="Tire 80% na prova do nível anterior para desbloquear"'}>${o?'':'🔒 '}${l}</button>`}).join('');
+ $('#tb').innerHTML=[['plan','📅 Planner'],['vid','▶️ Vídeos'],['quiz','📝 Provas'],['dic','📖 Dicionário'],['ai','🤖 Tutor IA']].map(t=>`<button class="${S.tab==t[0]?'on':''}" data-t="${t[0]}">${t[1]}</button>`).join('')}
+function plan(){
+ const d=D[S.lang],m=d.m[S.lv];let tot=0,ok=0;
+ const days=DAYS.map((dy,i)=>`<div class="c"><h2>${dy[0]}</h2>${dy[1].map((t,j)=>{tot++;const k=`lp:${S.lang}:${S.lv}:${i}:${j}`,c=st.get(k)==='1';if(c)ok++;
+ const mins=Math.max(5,Math.round(S.min*t[1]/100/5)*5);
+ const fx=x=>x.replace(/\{T\}/g,m.join(', ')).replace(/\{I\}/g,d.n.toLowerCase());
+ return `<div class="tk"><label class="t"><input type="checkbox" data-k="${k}" ${c?'checked':''}><span>${t[0]} <span class="mu">· ${mins} min</span></span></label><details><summary>Como fazer</summary><p><b>O que é:</b> ${fx(t[2])}</p><ol>${t[3].map(x=>'<li>'+fx(x)+'</li>').join('')}</ol></details></div>`}).join('')}</div>`).join('');
+ const p=Math.round(ok/tot*100);
+ return `<div class="c"><h2>${d.n} · Nível ${S.lv}</h2><div>${m.map(x=>`<span class="tag">${x}</span>`).join('')}</div>
+ <p class="mu">Estudo por dia: <select id="mn">${[30,45,60,90,120].map(x=>`<option ${x==S.min?'selected':''}>${x}</option>`).join('')}</select> min</p>
+ <div class="bar"><i style="width:${p}%"></i></div><p class="mu">Progresso da semana: ${p}% · ${LV[LV.indexOf(S.lv)+1]?(open(LV[LV.indexOf(S.lv)+1])?'Próximo nível desbloqueado ✅':'🔒 Tire 80% na prova para desbloquear o '+LV[LV.indexOf(S.lv)+1]):'Último nível 🏆'}</p></div>${days}
+ <button data-a="reset">Reiniciar semana</button>`}
+function vid(){
+ const d=D[S.lang],q=s=>'https://www.youtube.com/results?search_query='+encodeURIComponent(s);
+ return `<div class="c"><h2>Canais recomendados · ${d.n} ${S.lv}</h2><p class="mu">Os links abrem a busca no YouTube, sempre com os vídeos mais atuais de cada canal.</p>
+ ${d.ch[S.lv].map(c=>`<p>▶️ <a href="${q(c+' '+d.w+' '+S.lv)}" target="_blank" rel="noopener">${c}</a></p>`).join('')}</div>
+ <div class="c"><h2>Vídeos por tópico do módulo</h2>${d.m[S.lv].map(t=>`<p>🎯 <a href="${q(t+' '+d.w+' lesson '+S.lv)}" target="_blank" rel="noopener">${t}</a></p>`).join('')}
+ <p>🎧 <a href="${q(d.w+' listening practice '+S.lv)}" target="_blank" rel="noopener">Listening ${S.lv}</a></p></div>`}
+function quiz(){
+ const best=st.get(`lp:b:${S.lang}:${S.lv}`);
+ if(!Q)return `<div class="c"><h2>Prova · ${D[S.lang].n} ${S.lv}</h2><p class="mu">Uma prova para cada módulo/nível de cada idioma. Melhor nota: ${best?best+'%':'—'}</p>
+ <button class="p" data-a="qa" ${can()?'':'disabled'}>Prova do módulo (10 questões por IA)</button>${can()?'':' <button data-a="qs">Prova offline (2 questões)</button>'}
+ <p class="mu">Todas as questões são geradas pela IA e mudam a cada tentativa. Com 8 acertos (80%) você desbloqueia o próximo nível.${can()?'':' Para usar a IA, toque em 🔑 IA e informe sua chave da API da Anthropic; por enquanto vale a prova offline.'}</p></div>`;
+ if(Q.i>=Q.qs.length){const p=Math.round(Q.s/Q.qs.length*100);const b=+(best||0),cnt=Q.qs.length>=5||!can();if(cnt&&p>b)st.set(`lp:b:${S.lang}:${S.lv}`,p);
+ const nx=LV[LV.indexOf(S.lv)+1];if(!cnt)return `<div class="c"><h2>Treino: ${Q.s}/${Q.qs.length}</h2><p>Bom treino! Para desbloquear o próximo nível, faça a prova do módulo com 10 questões.</p><button class="p" data-a="qx">Voltar às provas</button></div>`;
+ return `<div class="c"><h2>Resultado: ${Q.s}/${Q.qs.length} (${p}%)</h2><p>${p>=80?(nx?`🎉 Parabéns! Você atingiu 80% e desbloqueou o nível ${nx}.`:'🏆 Parabéns! Você concluiu o último nível.'):'🔒 Você precisa de pelo menos 80% para desbloquear o próximo nível. Revise o módulo e tente de novo.'}</p>${p>=80&&nx?`<button class="p" data-a="next">Ir para o nível ${nx}</button> `:''}<button data-a="qx">Voltar às provas</button></div>`}
+ const q=Q.qs[Q.i];
+ return `<div class="c"><p class="mu">Questão ${Q.i+1}/${Q.qs.length}</p><h2>${esc(q.q)}</h2>${q.o.map((o,j)=>`<button class="o ${Q.r==null?'':j==q.a?'ok':j==Q.r?'bad':''}" data-o="${j}">${esc(o)}</button>`).join('')}
+ ${Q.r!=null?`<p>${q.e?esc(q.e):(Q.r==q.a?'✅ Correto!':'❌ Resposta: '+esc(q.o[q.a]))}</p><button class="p" data-a="qn">Próxima</button>`:''}</div>`}
+function ai(){
+ const ex=['Explique a gramática deste nível','Vamos praticar conversação','Corrija meu texto: '];
+ return `<div class="c"><h2>🤖 Tutor IA · ${D[S.lang].n} ${S.lv}</h2>${can()?'':'<p class="mu">Toque em 🔑 IA para informar sua chave da API da Anthropic e ativar o tutor.</p>'}
+ <div class="row">${ex.map(e=>`<button class="chip" data-e="${e}">${e.replace(': ','')}</button>`).join('')}</div>
+ <div id="ch">${H.map(h=>`<div class="msg ${h.r}">${esc(h.t)}</div>`).join('')}${busy?'<div class="msg a">…</div>':''}</div>
+ <textarea id="in" placeholder="Escreva sua dúvida ou texto…"></textarea><p><button class="p" data-a="send" ${can()&&!busy?'':'disabled'}>Enviar</button></p></div>`}
+const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+const G={en:'hello|olá;goodbye|tchau;please|por favor;thank you|obrigado;sorry|desculpa;yes|sim;no|não;water|água;food|comida;house|casa;family|família;friend|amigo;mother|mãe;father|pai;brother|irmão;sister|irmã;book|livro;school|escola;work|trabalho;time|tempo;day|dia;night|noite;today|hoje;tomorrow|amanhã;yesterday|ontem;big|grande;small|pequeno;good|bom;bad|ruim;happy|feliz;sad|triste;eat|comer;drink|beber;go|ir;come|vir;see|ver;speak|falar;learn|aprender;study|estudar;want|querer;love|amar;travel|viajar;city|cidade;money|dinheiro',
+es:'hola|olá;adiós|tchau;por favor|por favor;gracias|obrigado;perdón|desculpa;sí|sim;no|não;agua|água;comida|comida;casa|casa;familia|família;amigo|amigo;madre|mãe;padre|pai;hermano|irmão;hermana|irmã;libro|livro;escuela|escola;trabajo|trabalho;tiempo|tempo;día|dia;noche|noite;hoy|hoje;mañana|amanhã;ayer|ontem;grande|grande;pequeño|pequeno;bueno|bom;malo|ruim;feliz|feliz;triste|triste;comer|comer;beber|beber;ir|ir;venir|vir;ver|ver;hablar|falar;aprender|aprender;estudiar|estudar;querer|querer;amar|amar;viajar|viajar;ciudad|cidade;dinero|dinheiro'};
+const svl=()=>{try{return JSON.parse(st.get('lp:dic:'+S.lang)||'[]')}catch(e){return[]}};
+function dic(){
+ const d=D[S.lang],sv=svl(),has=w=>sv.some(x=>x[0]==w);
+ const row=(w,t)=>`<div class="c" style="margin:6px 0;display:flex;justify-content:space-between;gap:8px;align-items:center"><span><b>${esc(w)}</b> <span class="mu">— ${esc(t)}</span></span><span><button data-sp="${esc(w)}">🔊</button> <button data-sv="${esc(w+'|'+t)}">${has(w)?'✖':'⭐'}</button></span></div>`;
+ let h=`<div class="c"><h2>📖 Dicionário ${d.n}</h2><div class="row" style="margin:0"><input id="dq" maxlength="60" placeholder="Palavra em português ou em ${d.n}" value="${esc(DQ)}"><button class="p" data-a="ds">Buscar</button></div><p class="mu">Busca primeiro no glossário básico. Para qualquer outra palavra, a IA entrega tradução, definição e exemplos.</p></div>`;
+ if(DR){h+=DR.loc.map(x=>row(x[0],x[1])).join('');
+  if(DR.load)h+='<div class="c">Consultando a IA…</div>';
+  if(DR.err)h+=`<div class="c mu">${esc(DR.err)}</div>`;
+  if(DR.ai){const a=DR.ai;h+=`<div class="c"><h2>${esc(a.palavra)} <button data-sp="${esc(a.palavra)}">🔊</button> <button data-sv="${esc(a.palavra+'|'+a.traducao)}">${has(a.palavra)?'✖':'⭐'}</button></h2><p><b>${esc(a.traducao)}</b> <span class="mu">· ${esc(a.classe||'')}</span></p><p>${esc(a.definicao||'')}</p>${(a.exemplos||[]).map(x=>`<p>💬 ${esc(x.o)} <button data-sp="${esc(x.o)}">🔊</button><br><span class="mu">${esc(x.t)}</span></p>`).join('')}${a.dica?`<p class="mu">💡 ${esc(a.dica)}</p>`:''}</div>`}
+  else if(!DR.load&&DR.loc.length&&can())h+='<button data-a="dai">Buscar com IA</button>'}
+ h+=`<div class="c"><h2>⭐ Meu vocabulário (${sv.length})</h2>${sv.length?'':'<p class="mu">Toque em ⭐ para guardar palavras aqui.</p>'}</div>`+sv.map(x=>row(x[0],x[1])).join('');
+ return h}
+async function dsearch(useAI){
+ const q=DQ.trim();if(!q)return;const n=norm(q),d=D[S.lang];
+ const loc=G[S.lang].split(';').map(x=>x.split('|')).filter(x=>norm(x[0]).includes(n)||norm(x[1]).includes(n)).slice(0,8);
+ DR={loc,ai:null,err:'',load:false};
+ if(useAI||!loc.length){
+  if(!can())DR.err='Nenhum resultado no glossário básico. Para buscar qualquer palavra com IA, toque em 🔑 IA.';
+  else{DR.load=true;R();
+   try{let r=await askAI([{role:'user',content:`Você é um dicionário ${d.n}-português para alunos brasileiros de nível ${S.lv}. Consulta: "${q.replace(/"/g,'')}" (pode estar em português ou em ${d.n}). Responda SOMENTE JSON: {"palavra":"palavra em ${d.n}","traducao":"tradução em português","classe":"classe gramatical","definicao":"definição simples em ${d.n}","exemplos":[{"o":"frase em ${d.n}","t":"tradução em português"},{"o":"","t":""}],"dica":"observação curta em português (falso cognato, uso ou pronúncia)"}`}]);
+   r=JSON.parse(r.slice(r.indexOf('{'),r.lastIndexOf('}')+1));if(!r.palavra||!r.traducao)throw 0;DR.ai=r}
+   catch(e){DR.err='Não consegui consultar a IA agora. Tente de novo em instantes.'}
+   DR.load=false}}
+ R()}
+function R(){nav();$('#ky').style.display=sample?'none':'';$('#main').innerHTML={plan,vid,quiz,dic,ai}[S.tab]();if(S.tab=='ai'&&$('#in'))$('#in').value=R.draft||''}
+async function send(txt){
+ if(!txt||busy||!can())return;H.push({r:'u',t:txt});busy=true;R.draft='';R();
+ const d=D[S.lang],sys=`Você é um tutor de ${d.n} simpático para um falante de português do Brasil. Nível do aluno: ${S.lv}. Módulo: ${d.m[S.lv].join(', ')}. Explique em português, use exemplos em ${d.n} adequados ao nível, corrija erros com gentileza e termine com um mini exercício. Seja breve.`;
+ const t=H.map(h=>({role:h.r=='u'?'user':'assistant',content:h.t}));t[t.length-1].content=sys+'\n\nMensagem do aluno: '+txt;
+ try{H.push({r:'a',t:await askAI(t)})}catch(e){H.push({r:'a',t:'Não consegui responder agora. Tente de novo em instantes.'})}
+ busy=false;R()}
+async function genQuiz(){
+ Q={qs:[],i:0,s:0,r:null};$('#main').innerHTML='<div class="c">Gerando prova com IA…</div>';const d=D[S.lang];
+ try{let r=await askAI([{role:'user',content:`Crie 10 questões de múltipla escolha de ${d.n} nível ${S.lv}, cobrindo todos estes tópicos: ${d.m[S.lv].join(', ')}. Enunciados em ${d.w} (ou português quando for sobre significado), explicação curta em português. Responda SOMENTE JSON: [{"q":"","o":["","","",""],"a":0,"e":""}]`}]);r=r.replace(/```json|```/g,'');r=JSON.parse(r.slice(r.indexOf('['),r.lastIndexOf(']')+1));Q.qs=r.filter(x=>x&&x.q&&Array.isArray(x.o)&&x.o.length>1&&x.a<x.o.length);if(!Q.qs.length)throw 0}
+ catch(e){Q=null;alert('Não foi possível gerar a prova agora. Use a prova rápida.')}R()}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;const g=k=>b.dataset[k];
+ if(g('l')){S.lang=g('l');DR=null;DQ='';st.set('lp:lang',S.lang);if(!open(S.lv))S.lv='A1';st.set('lp:lv',S.lv);Q=null;H=[]}
+ else if(g('a')=='next'){S.lv=LV[LV.indexOf(S.lv)+1];st.set('lp:lv',S.lv);Q=null;H=[];S.tab='plan'}
+ else if(g('v')){S.lv=g('v');st.set('lp:lv',S.lv);Q=null;H=[]}
+ else if(g('t'))S.tab=g('t');
+ else if(g('e')){if(g('e').endsWith(': ')){S.tab='ai';R.draft=g('e');R();$('#in').focus();return}send(g('e'));return}
+ else if(g('o')!=null){if(Q.r!=null)return;Q.r=+g('o');if(Q.r==Q.qs[Q.i].a)Q.s++}
+ else if(g('a')=='reset'){DAYS.forEach((d,i)=>d[1].forEach((t,j)=>st.set(`lp:${S.lang}:${S.lv}:${i}:${j}`,'0')))}
+ else if(g('a')=='qs'){Q={qs:D[S.lang].q[S.lv].map(x=>({q:x[0],o:x[1],a:x[2]})),i:0,s:0,r:null}}
+ else if(g('a')=='qa'){genQuiz();return}
+ else if(g('a')=='qn')Q.i++,Q.r=null;
+ else if(g('a')=='qx')Q=null;
+ else if(g('a')=='send'){send($('#in').value.trim());return}
+ else if(g('a')=='ds'){dsearch(false);return}
+ else if(g('a')=='dai'){dsearch(true);return}
+ else if(g('sp')!=null){if(window.speechSynthesis){const u=new SpeechSynthesisUtterance(g('sp'));u.lang=S.lang=='en'?'en-US':'es-ES';speechSynthesis.cancel();speechSynthesis.speak(u)}return}
+ else if(g('sv')!=null){const i=g('sv').indexOf('|'),w=g('sv').slice(0,i),t=g('sv').slice(i+1);let l=svl();l=l.some(x=>x[0]==w)?l.filter(x=>x[0]!=w):[...l,[w,t]];st.set('lp:dic:'+S.lang,JSON.stringify(l))}
+ else return;R()});
+document.addEventListener('keydown',e=>{if(e.target.id=='dq'&&e.key=='Enter'){e.preventDefault();DQ=e.target.value;dsearch(false)}});
+document.addEventListener('change',e=>{
+ if(e.target.dataset.k){st.set(e.target.dataset.k,e.target.checked?'1':'0');R()}
+ if(e.target.id=='mn'){S.min=+e.target.value;st.set('lp:min',S.min);R()}});
+document.addEventListener('input',e=>{if(e.target.id=='in')R.draft=e.target.value;if(e.target.id=='dq')DQ=e.target.value});
+$('#ky').onclick=()=>{const k=prompt('Cole sua chave da API da Anthropic (fica salva só neste navegador). Deixe vazio para remover.',st.get('lp:key')||'');if(k!==null){st.set('lp:key',k.trim());R()}};
+R();
+(async()=>{try{if(window.claude&&claude.use){sample=await claude.use('sample');if(sample)R()}}catch(e){sample=null}})();
+</script></body></html>
